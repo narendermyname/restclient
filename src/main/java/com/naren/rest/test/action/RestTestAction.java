@@ -81,8 +81,12 @@ public class RestTestAction extends ActionSupport{
 	 */
 	public String executeRest(){
 		LOG.debug("Mehotd"+method+"Accept"+accept+"Content Type "+ctype+"URL "+url+"Request Body"+requestBody);
-		RestClient restClient=new RestClient();
-		String response=restClient.execute(url, method, ctype, accept, requestBody);
+		String response="";
+		try {
+			response = RestClient.execute(url, method, ctype, accept, requestBody);
+		} catch (final Exception e) {
+			LOG.error("Error while calling REST URL"+e.getMessage());
+		}
 		stream = new ByteArrayInputStream(response.getBytes());
 		return SUCCESS;
 	}

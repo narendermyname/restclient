@@ -31,21 +31,7 @@ public class RestClient {
 	public RestClient() {
 	}
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		
-		String url="http://localhost:9001/interview-task/task";
-		String method="GET";
-		String ctype="application/json";
-		String accept="application/json";
-		String requestBody="{\"name\":\"narender\",\"status\":\"Pending\",\"priority\":\"LOW\"}";
-		String response=new RestClient().execute(url, method, ctype, accept, requestBody);
-		LOG.debug("Response : "+response );
-	}
-
-	public String execute(String url,String method,String ctype,String accept,String requestBody){
+	public static String execute(String url,String method,String ctype,String accept,String requestBody) throws Exception{
 		LOG.debug("Starts RestClient.execute() Method :" +method+" URL : "+url+" Content Type : "+ctype+" Accept : "+accept+" Request Body : "+requestBody);
 		String response="";
 		HttpClient client= new DefaultHttpClient();
@@ -79,24 +65,22 @@ public class RestClient {
 				httpDelete.setHeader("Content-Type", ctype);
 				httpResponse=client.execute(httpDelete);
 			}
-			BufferedReader reader=new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent()));
-			String isvResponse;
-			while (( isvResponse = reader.readLine()) != null) {
-				if( httpResponse.getStatusLine().getStatusCode() == 404) {
-					LOG.debug("ERROR" +isvResponse);
-					return null;
-				} else if(httpResponse.getStatusLine().getStatusCode() >= 300) {
-					LOG.debug("ERROR" +isvResponse);
-				} else {
-					response +=isvResponse;
+			if(httpResponse.getEntity()!=null){
+				BufferedReader reader=new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent()));
+				String isvResponse;
+				while (( isvResponse = reader.readLine()) != null) {
+					if( httpResponse.getStatusLine().getStatusCode() == 404) {
+						LOG.debug("ERROR" +isvResponse);
+						return null;
+					} else if(httpResponse.getStatusLine().getStatusCode() >= 300) {
+						LOG.debug("ERROR" +isvResponse);
+					} else {
+						response +=isvResponse;
+					}
 				}
 			}
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		finally{
-			
+		} catch (final Exception e) {
+			throw new Exception(e.getMessage());
 		}
 		LOG.debug("Ends RestClient.execute()");
 		return response;
